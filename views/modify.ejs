@@ -1,0 +1,133 @@
+<style>
+    /* Corrección para evitar que el autocompletado del navegador ponga fondo blanco en Modo Oscuro */
+    .dark input:-webkit-autofill,
+    .dark input:-webkit-autofill:hover, 
+    .dark input:-webkit-autofill:focus, 
+    .dark input:-webkit-autofill:active,
+    .dark select:-webkit-autofill,
+    .dark select:-webkit-autofill:hover,
+    .dark select:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 30px #334155 inset !important; /* Corresponde a bg-slate-700 */
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
+
+<div class="animate-in slide-in-from-bottom-4">
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 transition-colors">
+        <i data-lucide="edit" class="text-indigo-600 dark:text-indigo-400"></i> Modificar Detalles
+    </h2>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="p-4 mb-6 text-emerald-700 bg-emerald-100 rounded-lg flex items-center gap-2"><i data-lucide="check-circle" class="w-5 h-5"></i> <%= success %></div>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="p-4 mb-6 text-red-700 bg-red-100 rounded-lg flex items-center gap-2"><i data-lucide="alert-circle" class="w-5 h-5"></i> <%= error %></div>
+    <% } %>
+
+    <% if (!attendee) { %>
+        <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 max-w-xl transition-colors">
+            <form action="/modify" method="GET" class="flex flex-col sm:flex-row gap-4">
+                <input type="text" name="ticket" required placeholder="Ingrese el Ticket exacto..." class="flex-1 px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors placeholder-slate-400">
+                <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition-all">Buscar</button>
+            </form>
+        </div>
+    <% } else { %>
+        <div class="bg-white dark:bg-slate-800 p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="text-lg font-semibold text-slate-800 dark:text-white">Editando a: <%= attendee.first_name %> <%= attendee.last_name %></h3>
+                <a href="/modify" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Cancelar</a>
+            </div>
+            
+            <form action="/modify" method="POST" class="space-y-6">
+                <input type="hidden" name="ticket" value="<%= attendee.ticket %>">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Número de Ticket</label><input type="text" value="<%= attendee.ticket %>" disabled class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 outline-none bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 transition-colors"></div>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Documento de Identidad *</label>
+                        <div class="flex gap-2">
+                            <select name="docType" required class="px-2 sm:px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors w-[35%] sm:w-32">
+                                <% if (typeof docTypes !== 'undefined' && docTypes.length > 0) { %>
+                                    <% docTypes.forEach(function(d) { %>
+                                        <option value="<%= d.name %>" <%= attendee.id_doc_type === d.name ? 'selected' : '' %>><%= d.name %></option>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option value="CC" <%= attendee.id_doc_type === 'CC' ? 'selected' : '' %>>CC</option>
+                                    <option value="CE" <%= attendee.id_doc_type === 'CE' ? 'selected' : '' %>>CE</option>
+                                    <option value="NIT" <%= attendee.id_doc_type === 'NIT' ? 'selected' : '' %>>NIT</option>
+                                    <option value="PPT" <%= attendee.id_doc_type === 'PPT' ? 'selected' : '' %>>PPT</option>
+                                    <option value="Pasaporte" <%= attendee.id_doc_type === 'Pasaporte' ? 'selected' : '' %>>Pasaporte</option>
+                                    <option value="Otro" <%= attendee.id_doc_type === 'Otro' ? 'selected' : '' %>>Otro</option>
+                                <% } %>
+                            </select>
+                            <input type="text" name="idDoc" value="<%= attendee.id_doc %>" required class="flex-1 min-w-0 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Nombres *</label><input type="text" name="firstName" value="<%= attendee.first_name %>" required class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Apellidos *</label><input type="text" name="lastName" value="<%= attendee.last_name %>" required class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"></div>
+                    
+                    <!-- NUEVOS CAMPOS: Sexo e Iglesia -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Sexo *</label>
+                        <select name="sex" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
+                            <option value="Masculino" <%= attendee.sex === 'Masculino' ? 'selected' : '' %>>Masculino</option>
+                            <option value="Femenino" <%= attendee.sex === 'Femenino' ? 'selected' : '' %>>Femenino</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Iglesia / Congregación</label><input type="text" name="church" value="<%= attendee.church %>" placeholder="Nombre de su iglesia" class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors placeholder-slate-400"></div>
+
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Correo Electrónico *</label><input type="email" name="email" value="<%= attendee.email %>" required class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Número de Teléfono</label><input type="text" name="phone" value="<%= attendee.phone %>" class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Dirección</label><input type="text" name="address" value="<%= attendee.address %>" class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"></div>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">País de Origen *</label>
+                        <select name="country" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
+                            <option value="">Seleccione un país...</option>
+                            <% if (typeof countries !== 'undefined' && countries.length > 0) { %>
+                                <% countries.forEach(function(c) { %>
+                                    <option value="<%= c.name %>" <%= attendee.country === c.name ? 'selected' : '' %>><%= c.name %></option>
+                                <% }); %>
+                            <% } else { %>
+                                <option value="Colombia" <%= attendee.country === 'Colombia' ? 'selected' : '' %>>Colombia</option>
+                                <option value="Mexico" <%= attendee.country === 'Mexico' ? 'selected' : '' %>>México</option>
+                                <option value="United States" <%= attendee.country === 'United States' ? 'selected' : '' %>>Estados Unidos</option>
+                                <option value="Other" <%= attendee.country === 'Other' ? 'selected' : '' %>>Otro...</option>
+                            <% } %>
+                        </select>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Rol *</label>
+                        <select name="role" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
+                            <option value="Pastor" <%= attendee.role == 'Pastor' ? 'selected' : '' %>>Pastor</option>
+                            <option value="Leader" <%= attendee.role == 'Leader' ? 'selected' : '' %>>Líder</option>
+                            <option value="Cordinador" <%= attendee.role == 'Cordinador' ? 'selected' : '' %>>Coordinador</option>
+                            <option value="Voluntario" <%= attendee.role == 'Voluntario' ? 'selected' : '' %>>Voluntario</option>
+                            <option value="Public" <%= attendee.role == 'Public' ? 'selected' : '' %>>Público (Asistente General)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Estado de Ingreso *</label>
+                        <select name="is_present" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
+                            <option value="1" <%= attendee.is_present ? 'selected' : '' %>>Adentro (Ya Ingresó)</option>
+                            <option value="0" <%= !attendee.is_present ? 'selected' : '' %>>Pendiente (No ha llegado)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Observaciones</label>
+                    <textarea name="observations" rows="3" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors resize-none"><%= attendee.observations %></textarea>
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row justify-end">
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    <% } %>
+</div>

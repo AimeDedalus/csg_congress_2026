@@ -1,0 +1,47 @@
+<style>
+    /* Corrección para evitar que el autocompletado del navegador ponga fondo blanco en Modo Oscuro */
+    .dark input:-webkit-autofill,
+    .dark input:-webkit-autofill:hover, 
+    .dark input:-webkit-autofill:focus, 
+    .dark input:-webkit-autofill:active,
+    .dark select:-webkit-autofill,
+    .dark select:-webkit-autofill:hover,
+    .dark select:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 30px #334155 inset !important; /* Corresponde a bg-slate-700 */
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
+
+<div class="animate-in slide-in-from-bottom-4">
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 transition-colors">
+        <i data-lucide="trash-2" class="text-red-500"></i> Eliminar Asistente
+    </h2>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="p-4 mb-6 text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center gap-2 transition-colors"><i data-lucide="check-circle" class="w-5 h-5"></i> <%= success %></div>
+    <% } %>
+
+    <% if (!attendee) { %>
+        <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 max-w-xl transition-colors">
+            <form action="/delete" method="GET" class="flex flex-col sm:flex-row gap-4">
+                <input type="text" name="ticket" required placeholder="Ingrese el número exacto..." class="flex-1 px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500 outline-none transition-colors placeholder-slate-400">
+                <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-slate-800 dark:bg-red-600 text-white rounded-lg font-semibold hover:bg-slate-900 dark:hover:bg-red-700 transition-all">Buscar</button>
+            </form>
+        </div>
+    <% } else { %>
+        <div class="bg-white dark:bg-slate-800 p-5 sm:p-8 rounded-xl shadow-sm border border-red-200 dark:border-red-900/30 max-w-2xl text-center border-t-4 border-t-red-500 mx-auto transition-colors">
+            <i data-lucide="alert-circle" class="w-16 h-16 text-red-500 mx-auto mb-4"></i>
+            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-2 transition-colors">Confirmar Eliminación</h3>
+            <p class="text-slate-600 dark:text-slate-300 mb-6 transition-colors">
+                Está a punto de eliminar permanentemente el registro de <br><strong class="text-slate-800 dark:text-white"><%= attendee.first_name %> <%= attendee.last_name %></strong> (Ticket: <%= attendee.ticket %>).
+            </p>
+            
+            <form action="/delete" method="POST" class="flex flex-col sm:flex-row justify-center gap-4">
+                <input type="hidden" name="ticket" value="<%= attendee.ticket %>">
+                <a href="/delete" class="w-full sm:w-auto px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Cancelar</a>
+                <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 shadow-md transition-all">Sí, Eliminar Registro</button>
+            </form>
+        </div>
+    <% } %>
+</div>

@@ -1,0 +1,28 @@
+<div class="h-full flex flex-col items-center justify-center text-center animate-in fade-in zoom-in">
+    <!-- Ajuste móvil: p-6 sm:p-10 en vez de fijo p-10 -->
+    <div class="bg-white p-6 sm:p-10 rounded-2xl shadow-xl max-w-2xl w-full border border-slate-100">
+        
+        <img src="/img/logo.png" alt="Logo Contemplando Su Gloria" class="h-32 object-contain mx-auto mb-6" onerror="this.onerror=null; this.src='https:&#47;&#47;[via.placeholder.com/300x120/EEF2FF/4F46E5?text=Logo](https://via.placeholder.com/300x120/EEF2FF/4F46E5?text=Logo)'">
+
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-4 tracking-tight">Contemplando Su Gloria</h1>
+        
+        <p class="text-base sm:text-lg text-slate-500 mb-8 max-w-lg mx-auto leading-relaxed">
+            Encendidos por la Revelación de su Gloria.<br>
+            Una cita divina con Medellín.<br>
+            Contemplando Su Gloria Conference.<br>
+            7-8 de Agosto, 2026
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <% if (user) { %>
+            <a href="/consult" class="px-8 py-3 bg-white text-indigo-600 border-2 border-indigo-200 rounded-lg font-semibold hover:bg-indigo-50 shadow-sm transition-all flex items-center justify-center gap-2">
+                <i data-lucide="check-circle" class="w-5 h-5"></i> Mesa de Entrada
+            </a>
+            <% } else { %>
+            <a href="/login" class="px-8 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2">
+                <i data-lucide="log-in" class="w-5 h-5"></i> Iniciar Sesión para Continuar
+            </a>
+            <% } %>
+        </div>
+    </div>
+</div>

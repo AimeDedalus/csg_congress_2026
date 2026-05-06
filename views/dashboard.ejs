@@ -1,0 +1,65 @@
+<div class="animate-in fade-in">
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 transition-colors">
+        <i data-lucide="layout-dashboard" class="text-indigo-600 dark:text-indigo-400"></i> Panel de Control en Vivo
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex items-center gap-4 transition-colors">
+            <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md"><i data-lucide="users" class="w-7 h-7"></i></div>
+            <div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Registrados</p>
+                <p class="text-3xl font-bold text-slate-800 dark:text-white"><%= stats.total %></p>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex items-center gap-4 transition-colors">
+            <div class="bg-emerald-500 text-white p-4 rounded-lg shadow-md"><i data-lucide="check-circle" class="w-7 h-7"></i></div>
+            <div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Presentes Actualmente</p>
+                <p class="text-3xl font-bold text-slate-800 dark:text-white"><%= stats.present %></p>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex items-center gap-4 transition-colors">
+            <div class="bg-amber-500 text-white p-4 rounded-lg shadow-md"><i data-lucide="x-circle" class="w-7 h-7"></i></div>
+            <div>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Aún No Han Llegado</p>
+                <p class="text-3xl font-bold text-slate-800 dark:text-white"><%= stats.absent %></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+            <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Asistentes por Rol</h3>
+            <div class="space-y-4">
+                <% ['Pastor', 'Leader', 'Cordinador', 'Voluntario', 'Public'].forEach(role => { %>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 font-medium text-slate-600 dark:text-slate-300">
+                            <span>
+                                <%= role === 'Leader' ? 'Líder' : 
+                                    role === 'Public' ? 'Público' : 
+                                    role === 'Cordinador' ? 'Coordinador' : 
+                                    role === 'Voluntario' ? 'Voluntario' : 'Pastor' %>
+                            </span>
+                            <span><%= stats.roles[role] || 0 %></span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-indigo-600 dark:bg-indigo-500 h-2.5 rounded-full" style="width: <%= stats.total ? ((stats.roles[role] || 0) / stats.total) * 100 : 0 %>%"></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+            <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Nacionalidades</h3>
+            <ul class="divide-y divide-slate-100 dark:divide-slate-700">
+                <% Object.entries(stats.countries).sort((a,b)=>b[1]-a[1]).slice(0,5).forEach(([country, count]) => { %>
+                    <li class="py-3 flex justify-between items-center">
+                        <span class="font-medium text-slate-700 dark:text-slate-300"><%= country %></span>
+                        <span class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 py-1 px-3 rounded-full text-sm font-semibold"><%= count %></span>
+                    </li>
+                <% }) %>
+            </ul>
+        </div>
+    </div>
+</div>

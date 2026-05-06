@@ -1,0 +1,179 @@
+<style>
+    /* Corrección para evitar que el autocompletado del navegador ponga fondo blanco en Modo Oscuro */
+    .dark input:-webkit-autofill,
+    .dark input:-webkit-autofill:hover, 
+    .dark input:-webkit-autofill:focus, 
+    .dark input:-webkit-autofill:active,
+    .dark select:-webkit-autofill,
+    .dark select:-webkit-autofill:hover,
+    .dark select:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 30px #334155 inset !important; /* Corresponde a bg-slate-700 */
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
+
+<div class="animate-in slide-in-from-bottom-4">
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 transition-colors">
+        <i data-lucide="user-plus" class="text-indigo-600 dark:text-indigo-400"></i> Nuevo Registro
+    </h2>
+    
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="p-4 mb-4 text-emerald-700 bg-emerald-100 rounded-lg flex items-center gap-2"><i data-lucide="check-circle" class="w-5 h-5"></i> <%= success %></div>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg flex items-center gap-2"><i data-lucide="alert-circle" class="w-5 h-5"></i> <%= error %></div>
+    <% } %>
+
+    <div class="bg-white dark:bg-slate-800 p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+        <form action="/register" method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- TICKET -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Número de Ticket *</label>
+                    <input type="text" name="ticket" required placeholder="Ej. TKT-004" pattern="^[a-zA-Z0-9\-]+$" 
+			   oninvalid="this.setCustomValidity(this.validity.valueMissing ? 'El número de ticket es obligatorio.' : 'Debe ser alfanumérico sin espacios. (letras, números y guiones permitidos).')"  
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 transition-all">
+                </div>
+                
+                <!-- TIPO DE DOCUMENTO -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Documento de Identidad *</label>
+                    <div class="flex gap-2">
+                        <select name="docType" required 
+                                oninvalid="this.setCustomValidity('Por favor, seleccione un tipo de documento.')" 
+                                oninput="this.setCustomValidity('')" 
+                                class="px-2 sm:px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all w-[35%] sm:w-32">
+                            <% if (typeof docTypes !== 'undefined' && docTypes.length > 0) { %>
+                                <% docTypes.forEach(function(d) { %>
+                                    <option value="<%= d.name %>"><%= d.name %></option>
+                                <% }); %>
+                            <% } else { %>
+                                <option value="CC">CC</option><option value="CE">CE</option><option value="NIT">NIT</option><option value="PPT">PPT</option><option value="Pasaporte">Pasaporte</option><option value="Otro">Otro</option>
+                            <% } %>
+                        </select>
+                        <input type="text" name="idDoc" required placeholder="Número" pattern="^[a-zA-Z0-9]+$" 
+                               oninvalid="this.setCustomValidity(this.validity.valueMissing ? 'El número de documento es obligatorio.' : 'Debe ser alfanumérico sin espacios ni caracteres especiales.')" 
+                               oninput="this.setCustomValidity('')" 
+                               class="flex-1 min-w-0 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 transition-all">
+                    </div>
+                </div>
+
+                <!-- NOMBRES -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Nombres *</label>
+                    <input type="text" name="firstName" required pattern="^[a-zA-ZÀ-ÿ\s]+$" 
+                           oninvalid="this.setCustomValidity(this.validity.valueMissing ? 'Los nombres son obligatorios.' : 'Solo caracteres alfabéticos (se permiten acentos y espacios).')" 
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                </div>
+                
+                <!-- APELLIDOS -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Apellidos *</label>
+                    <input type="text" name="lastName" required pattern="^[a-zA-ZÀ-ÿ\s]+$" 
+                           oninvalid="this.setCustomValidity(this.validity.valueMissing ? 'Los apellidos son obligatorios.' : 'Solo caracteres alfabéticos (se permiten acentos y espacios).')" 
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                </div>
+                
+                <!-- SEXO -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Sexo *</label>
+                    <select name="sex" required 
+                            oninvalid="this.setCustomValidity('Por favor, seleccione el sexo.')" 
+                            oninput="this.setCustomValidity('')" 
+                            class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                        <option value="">Seleccione...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </div>
+                
+                <!-- IGLESIA -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Iglesia / Congregación</label>
+                    <input type="text" name="church" placeholder="Nombre de su iglesia" pattern="^[a-zA-Z0-9À-ÿ\s\-\.,]+$" 
+                           oninvalid="this.setCustomValidity('Caracteres alfanuméricos básicos permitidos.')" 
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 transition-all">
+                </div>
+
+                <!-- EMAIL -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Correo Electrónico *</label>
+                    <input type="text" name="email" required pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" 
+                           oninvalid="this.setCustomValidity(this.validity.valueMissing ? 'El correo electrónico es obligatorio.' : 'Debe tener un formato de correo válido (ejemplo@dominio.com).')" 
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                </div>
+                
+                <!-- TELÉFONO -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Número de Teléfono</label>
+                    <input type="text" name="phone" pattern="^[\d\s\-\+\(\)]+$" 
+                           oninvalid="this.setCustomValidity('Formato de teléfono válido (números, paréntesis, guiones y espacios).')" 
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                </div>
+                
+                <!-- DIRECCIÓN -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Dirección</label>
+                    <input type="text" name="address" pattern="^[a-zA-Z0-9À-ÿ\s\-\.,#]+$" 
+                           oninvalid="this.setCustomValidity('Solo caracteres alfanuméricos y símbolos básicos de dirección (#, -, .).')" 
+                           oninput="this.setCustomValidity('')" 
+                           class="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                </div>
+                
+                <!-- PAÍS -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">País de Origen *</label>
+                    <select name="country" required 
+                            oninvalid="this.setCustomValidity('Por favor, seleccione un país de origen.')" 
+                            oninput="this.setCustomValidity('')" 
+                            class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                        <option value="">Seleccione un país...</option>
+                        <% if (typeof countries !== 'undefined' && countries.length > 0) { %>
+                            <% countries.forEach(function(c) { %>
+                                <option value="<%= c.name %>"><%= c.name %></option>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="Colombia">Colombia</option><option value="Mexico">México</option><option value="United States">Estados Unidos</option><option value="Other">Otro...</option>
+                        <% } %>
+                    </select>
+                </div>
+                
+                <!-- ROL -->
+                <div class="flex flex-col gap-1.5 md:col-span-2">
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Rol *</label>
+                    <select name="role" required 
+                            oninvalid="this.setCustomValidity('Por favor, seleccione el rol del asistente.')" 
+                            oninput="this.setCustomValidity('')" 
+                            class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white transition-all">
+                        <option value="">Seleccione un rol...</option>
+                        <option value="Pastor">Pastor</option>
+                        <option value="Leader">Líder</option>
+                        <option value="Cordinador">Coordinador</option>
+                        <option value="Voluntario">Voluntario</option>
+                        <option value="Public">Público (Asistente General)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Observaciones</label>
+                <textarea name="observations" rows="3" oninput="this.value = this.value.replace(/[^a-zA-Z0-9À-ÿ\s\-\.,!?()]/g, '')" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 transition-all resize-none" placeholder="Necesidades especiales, requerimientos dietéticos, etc."></textarea>
+                <span class="text-xs text-slate-400 dark:text-slate-500">Solo caracteres alfanuméricos permitidos (sin símbolos extraños).</span>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-end">
+                <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="check" class="w-5 h-5"></i> Completar Registro
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
