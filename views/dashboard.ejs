@@ -3,31 +3,42 @@
         <i data-lucide="layout-dashboard" class="text-indigo-600 dark:text-indigo-400"></i> Panel de Control en Vivo
     </h2>
     
+    <!-- TARJETAS PRINCIPALES REDISEÑADAS -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex items-center gap-4 transition-colors">
-            <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md"><i data-lucide="users" class="w-7 h-7"></i></div>
-            <div>
-                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Registrados</p>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white"><%= stats.total %></p>
+        
+        <!-- Tarjeta 1: Total Registrados -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex flex-col transition-colors">
+            <div class="bg-blue-500 text-white p-3 rounded-xl shadow-md w-max mb-4">
+                <i data-lucide="users" class="w-6 h-6"></i>
             </div>
+            <p class="text-4xl font-extrabold text-slate-800 dark:text-white mb-1"><%= stats.total %></p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Registrados</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex items-center gap-4 transition-colors">
-            <div class="bg-emerald-500 text-white p-4 rounded-lg shadow-md"><i data-lucide="check-circle" class="w-7 h-7"></i></div>
-            <div>
-                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Presentes Actualmente</p>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white"><%= stats.present %></p>
+        
+        <!-- Tarjeta 2: Presentes -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex flex-col transition-colors">
+            <div class="bg-emerald-500 text-white p-3 rounded-xl shadow-md w-max mb-4">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
             </div>
+            <p class="text-4xl font-extrabold text-slate-800 dark:text-white mb-1"><%= stats.present %></p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Presentes Actualmente</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex items-center gap-4 transition-colors">
-            <div class="bg-amber-500 text-white p-4 rounded-lg shadow-md"><i data-lucide="x-circle" class="w-7 h-7"></i></div>
-            <div>
-                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Aún No Han Llegado</p>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white"><%= stats.absent %></p>
+        
+        <!-- Tarjeta 3: Ausentes -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 sm:p-6 flex flex-col transition-colors">
+            <div class="bg-amber-500 text-white p-3 rounded-xl shadow-md w-max mb-4">
+                <i data-lucide="x-circle" class="w-6 h-6"></i>
             </div>
+            <p class="text-4xl font-extrabold text-slate-800 dark:text-white mb-1"><%= stats.absent %></p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Aún No Han Llegado</p>
         </div>
+
     </div>
 
+    <!-- GRÁFICOS INFERIORES -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Asistentes por Rol -->
         <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
             <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Asistentes por Rol</h3>
             <div class="space-y-4">
@@ -50,6 +61,7 @@
             </div>
         </div>
 
+        <!-- Nacionalidades -->
         <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
             <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Nacionalidades</h3>
             <ul class="divide-y divide-slate-100 dark:divide-slate-700">
@@ -61,5 +73,6 @@
                 <% }) %>
             </ul>
         </div>
+        
     </div>
 </div>
