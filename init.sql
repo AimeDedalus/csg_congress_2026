@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS attendees (
   role ENUM('Pastor', 'Leader', 'Cordinador', 'Voluntario', 'Public') NOT NULL,
   observations TEXT,
   is_present BOOLEAN DEFAULT FALSE,
+  check_in_time TIMESTAMP NULL DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -10,6 +10,7 @@ services:
       - DB_USER=root
       - DB_PASS=rootpassword
       - DB_NAME=congress_db
+      - TZ=America/Bogota
     depends_on:
       db:
         condition: service_healthy
@@ -20,13 +21,15 @@ services:
   db:
     image: mysql:8.0
     restart: unless-stopped
+    command: --default-time-zone='-05:00'
     environment:
       - MYSQL_ROOT_PASSWORD=rootpassword
       - MYSQL_DATABASE=congress_db
+      - TZ=America/Bogota
     ports:
       - "3306:3306"
     volumes:
-      - db_data_v4:/var/lib/mysql
+      - db_data_v5:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -34,4 +37,4 @@ services:
       retries: 10
 
 volumes:
-  db_data_v4:
+  db_data_v5:

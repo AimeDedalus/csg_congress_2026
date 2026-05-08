@@ -5,6 +5,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || 'rootpassword',
   database: process.env.DB_NAME || 'congress_db',
+  timezone: '-05:00', // <-- ESTA LÍNEA ES LA MAGIA
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0

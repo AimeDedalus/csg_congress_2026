@@ -68,6 +68,7 @@ exports.postCreateUser = async (req, res) => {
 exports.postUpdateUser = async (req, res) => {
   const { id, username, password, role } = req.body;
   try {
+    // Evitar que el superadmin se quite sus propios permisos por error
     if (id == req.session.user.id && role !== 'superadmin') {
       const users = await User.findAll();
       return res.render('users', { title: 'Gestión de Usuarios', users, success: null, error: 'No puedes quitarte el rol de superadmin a ti mismo.' });
@@ -75,6 +76,7 @@ exports.postUpdateUser = async (req, res) => {
     
     await User.update(id, username, password, role);
     
+    // Actualizar la sesión si el usuario se edita a sí mismo
     if (id == req.session.user.id) {
         req.session.user.username = username;
         req.session.user.role = role;
@@ -141,25 +143,48 @@ exports.getBackup = async (req, res) => {
 exports.postRestore = async (req, res) => {
   try {
     const { type, attendees } = req.body;
+    
     if (type !== 'congress_backup' || !Array.isArray(attendees)) {
       return res.status(400).json({ success: false, error: 'Formato de archivo inválido. Sube un JSON de respaldo del congreso.' });
     }
+    
     await db.execute('DELETE FROM attendees');
+    
     for (const a of attendees) {
+      // 1. Limpiamos y aseguramos el formato de la fecha para que MySQL lo entienda
+      let parsedDate = null;
+      if (a.check_in_time) {
+          const d = new Date(a.check_in_time);
+          if (!isNaN(d)) parsedDate = d;
+      }
+
       await Attendee.create({
-        ticket: a.ticket, docType: a.id_doc_type || 'CC', idDoc: a.id_doc, firstName: a.first_name,
-        lastName: a.last_name, sex: a.sex || 'Masculino', church: a.church || '', address: a.address, 
-        email: a.email, phone: a.phone, country: a.country, role: a.role, observations: a.observations
+        ticket: a.ticket, 
+        docType: a.id_doc_type || 'CC', 
+        idDoc: a.id_doc, 
+        firstName: a.first_name,
+        lastName: a.last_name, 
+        sex: a.sex || 'Masculino', 
+        church: a.church || '', 
+        address: a.address || '', 
+        email: a.email, 
+        phone: a.phone || '', 
+        country: a.country, 
+        role: a.role, 
+        observations: a.observations || '',
+        is_present: a.is_present,
+        check_in_time: parsedDate // Pasamos la fecha ya procesada o nula
       });
-      if (a.is_present) await Attendee.checkIn(a.ticket);
     }
+    
     if (typeof Log !== 'undefined' && Log.create) {
         await Log.create(req.session.user.username, 'RESTAURAR_RESPALDO', `Restauró la base de datos completa desde un archivo JSON.`);
     }
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: 'Error interno al intentar restaurar los datos de la base de datos.' });
+    console.error("Error al restaurar BD:", err);
+    // 2. AHORA ENVIAMOS EL MENSAJE REAL AL POPUP
+    res.status(500).json({ success: false, error: 'Fallo de MySQL: ' + err.message });
   }
 };
 
@@ -297,13 +322,12 @@ exports.getConsult = async (req, res) => {
   res.render('consult', { title: 'Consultas y Check-In', attendees, query, field, sortOrder, editedTicket });
 };
 
-// --- CORRECCIÓN MARCAR ENTRADA ---
 exports.postCheckIn = async (req, res) => {
   await Attendee.checkIn(req.body.ticket);
   if (typeof Log !== 'undefined' && Log.create) {
     await Log.create(req.session.user.username, 'CHECK_IN', `Marcó entrada exitosa para el Ticket: ${req.body.ticket}.`);
   }
-  // Redirige a Consultas con el parámetro 'edited' para limpiar el buscador y resaltar la fila en verde
+  // Redirige enviando el ticket editado para resaltarlo visualmente y limpiar el buscador
   res.redirect('/consult?edited=' + encodeURIComponent(req.body.ticket));
 };
 
@@ -324,7 +348,6 @@ exports.getModify = async (req, res) => {
   res.render('modify', { title: 'Modificar Registro', attendee, success: null, countries, docTypes });
 };
 
-// --- CORRECCIÓN MODIFICAR ---
 exports.postModify = async (req, res) => {
   let countries = [];
   let docTypes = [];
@@ -341,7 +364,7 @@ exports.postModify = async (req, res) => {
         await Log.create(req.session.user.username, 'MODIFICACION', `Modificó los datos del asistente con Ticket: ${req.body.ticket}.`);
     }
     
-    // Redirige a Consultas tras modificar exitosamente
+    // Redirige de vuelta a la lista de consultas resaltando el modificado
     res.redirect('/consult?edited=' + encodeURIComponent(req.body.ticket));
   } catch (err) {
     const attendee = await Attendee.findByTicket(req.body.ticket);
@@ -361,5 +384,12 @@ exports.postDelete = async (req, res) => {
   if (typeof Log !== 'undefined' && Log.create) {
     await Log.create(req.session.user.username, 'ELIMINACION', `Eliminó permanentemente el Ticket: ${req.body.ticket}.`);
   }
-  res.render('delete', { title: 'Eliminar Registro', attendee: null, success: 'Registro eliminado permanentemente.' });
+  
+  // Si la petición viene desde la ventana flotante (Consultas), lo redirigimos allí.
+  if (req.body.redirect) {
+    res.redirect(req.body.redirect);
+  } else {
+    // Comportamiento original por si usan la ruta antigua
+    res.render('delete', { title: 'Eliminar Registro', attendee: null, success: 'Registro eliminado permanentemente.' });
+  }
 };
