@@ -18,6 +18,10 @@
                     <option value="all" <%= typeof filter !== 'undefined' && filter === 'all' ? 'selected' : '' %>>Todos los Roles</option>
                     <option value="iglesia" <%= typeof filter !== 'undefined' && filter === 'iglesia' ? 'selected' : '' %>>Agrupado por Iglesias</option>
                 </optgroup>
+                <optgroup label="Por Asistencia">
+                    <option value="presentes" <%= typeof filter !== 'undefined' && filter === 'presentes' ? 'selected' : '' %>>Solo Presentes (Adentro)</option>
+                    <option value="ausentes" <%= typeof filter !== 'undefined' && filter === 'ausentes' ? 'selected' : '' %>>Solo Ausentes (Pendientes)</option>
+                </optgroup>
                 <optgroup label="Por Sexo">
                     <option value="masculino" <%= typeof filter !== 'undefined' && filter === 'masculino' ? 'selected' : '' %>>Solo Hombres</option>
                     <option value="femenino" <%= typeof filter !== 'undefined' && filter === 'femenino' ? 'selected' : '' %>>Solo Mujeres</option>
@@ -33,16 +37,18 @@
         </form>
     </div>
 
-    <!-- Reglas de estilo para impresión limpia -->
+    <!-- Reglas de estilo robustas para impresión -->
     <style>
         @media print {
-            body { background-color: white !important; }
-            nav, button, .print\:hidden { display: none !important; }
+            body { background-color: white !important; color: black !important; }
+            nav, header, button, .print\:hidden { display: none !important; }
             main { padding: 0 !important; margin: 0 !important; overflow: visible !important; }
-            .bg-white { box-shadow: none !important; border: none !important; background: white !important; color: black !important; }
+            .bg-white, .dark\:bg-slate-800 { box-shadow: none !important; border: none !important; background: white !important; }
             .overflow-x-auto { overflow: visible !important; }
-            .break-inside-avoid { break-inside: avoid; }
-            /* Forzar colores de badges al imprimir */
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { color: black !important; border-bottom: 1px solid #ddd !important; }
+            tr { break-inside: avoid; page-break-inside: avoid; }
+            h2, h3 { color: black !important; page-break-after: avoid; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
@@ -54,9 +60,9 @@
     <% 
         const renderTable = (title, iconClass, colorClass, dataArray) => { 
     %>
-    <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 break-inside-avoid transition-colors">
+    <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 transition-colors" style="page-break-inside: avoid;">
         <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2">
-            <i data-lucide="<%= iconClass %>" class="w-5 h-5 <%= colorClass %>"></i> <%= title %> (<%= dataArray.length %>)
+            <i data-lucide="<%= iconClass %>" class="w-5 h-5 <%= colorClass %>"></i> <%= title %> (<%= dataArray ? dataArray.length : 0 %>)
         </h3>
         <div class="overflow-x-auto w-full">
             <table class="w-full text-left border-collapse min-w-[600px]">
@@ -67,7 +73,7 @@
                         <th class="p-3 font-semibold whitespace-nowrap">
                             <a href="/reports?filter=<%= currentFilter %>&sort=<%= nextSort %>" class="inline-flex items-center gap-1.5 px-3 py-1.5 -ml-3 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 transition-colors border border-transparent hover:border-indigo-100 dark:hover:border-indigo-800">
                                 Apellidos
-                                <% if (typeof sortOrder !== 'undefined' && sortOrder === 'asc') { %><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600 dark:text-indigo-400"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg><% } else { %><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600 dark:text-indigo-400"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg><% } %>
+                                <% if (typeof sortOrder !== 'undefined' && sortOrder === 'asc') { %><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600 dark:text-indigo-400"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg><% } else { %><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600 dark:text-indigo-400"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg><% } %>
                             </a>
                         </th>
                         <th class="p-3 font-semibold whitespace-nowrap">Iglesia / Rol</th>
@@ -76,7 +82,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm transition-colors">
-                    <% if (dataArray.length === 0) { %>
+                    <% if (!dataArray || dataArray.length === 0) { %>
                         <tr><td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">No hay registros para mostrar.</td></tr>
                     <% } else { %>
                         <% dataArray.forEach(function(a) { %>
@@ -110,12 +116,15 @@
     </div>
     <% } %>
 
-    <!-- RENDERIZADO CONDICIONAL -->
+    <!-- RENDERIZADO CONDICIONAL DE TODAS LAS TABLAS -->
     <% if ((currentFilter === 'all' || currentFilter === 'pastor') && typeof pastors !== 'undefined') { renderTable('Pastores', 'users', 'text-blue-500 dark:text-blue-400', pastors); } %>
     <% if ((currentFilter === 'all' || currentFilter === 'leader') && typeof leaders !== 'undefined') { renderTable('Líderes', 'users', 'text-emerald-500 dark:text-emerald-400', leaders); } %>
     <% if ((currentFilter === 'all' || currentFilter === 'cordinador') && typeof coordinators !== 'undefined') { renderTable('Coordinadores', 'users', 'text-purple-500 dark:text-purple-400', coordinators); } %>
     <% if ((currentFilter === 'all' || currentFilter === 'voluntario') && typeof volunteers !== 'undefined') { renderTable('Voluntarios', 'users', 'text-pink-500 dark:text-pink-400', volunteers); } %>
     <% if ((currentFilter === 'all' || currentFilter === 'public') && typeof publicAttendees !== 'undefined') { renderTable('Público General', 'users', 'text-amber-500 dark:text-amber-400', publicAttendees); } %>
+
+    <% if (currentFilter === 'presentes') { renderTable('Presentes (Ya Ingresaron)', 'check-circle', 'text-emerald-600 dark:text-emerald-400', typeof present !== 'undefined' ? present : []); } %>
+    <% if (currentFilter === 'ausentes') { renderTable('Ausentes (No Han Llegado)', 'x-circle', 'text-amber-600 dark:text-amber-400', typeof absent !== 'undefined' ? absent : []); } %>
 
     <% if (currentFilter === 'masculino') { renderTable('Hombres', 'user', 'text-blue-600 dark:text-blue-400', typeof men !== 'undefined' ? men : []); } %>
     <% if (currentFilter === 'femenino') { renderTable('Mujeres', 'user', 'text-pink-600 dark:text-pink-400', typeof women !== 'undefined' ? women : []); } %>
@@ -129,20 +138,20 @@
             });
         %>
     <% } %>
-</div>
 
-<!-- SCRIPT PARA IMPRESIÓN LIMPIA EN MODO OSCURO -->
-<script>
-    window.addEventListener('beforeprint', () => {
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.setAttribute('data-print-dark', 'true');
-        }
-    });
-    window.addEventListener('afterprint', () => {
-        if (document.documentElement.getAttribute('data-print-dark') === 'true') {
-            document.documentElement.classList.add('dark');
-            document.documentElement.removeAttribute('data-print-dark');
-        }
-    });
-</script>
+    <!-- SCRIPT PARA IMPRESIÓN LIMPIA EN MODO OSCURO -->
+    <script>
+        window.addEventListener('beforeprint', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-print-dark', 'true');
+            }
+        });
+        window.addEventListener('afterprint', () => {
+            if (document.documentElement.getAttribute('data-print-dark') === 'true') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.removeAttribute('data-print-dark');
+            }
+        });
+    </script>
+</div>

@@ -3,42 +3,36 @@
         <i data-lucide="search" class="text-indigo-600 dark:text-indigo-400"></i> Consultas y Control de Entrada
     </h2>
     
-    <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6 transition-colors">
-        <form action="/consult" method="GET" class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
-                </div>
-                <input type="text" name="q" value="<%= typeof query !== 'undefined' ? query : '' %>" class="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 transition-all" placeholder="Buscar asistentes...">
-                <input type="hidden" name="sort" value="<%= typeof sortOrder !== 'undefined' ? sortOrder : '' %>">
-            </div>
-            <select name="field" class="px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white min-w-[220px] transition-colors">
-                <option value="ticket" <%= typeof field !== 'undefined' && field == 'ticket' ? 'selected' : '' %>>Buscar por Número de Ticket</option>
-                <option value="id_doc" <%= typeof field !== 'undefined' && field == 'id_doc' ? 'selected' : '' %>>Buscar por Documento</option>
-                <option value="last_name" <%= typeof field !== 'undefined' && field == 'last_name' ? 'selected' : '' %>>Buscar por Apellidos</option>
-                <option value="first_name" <%= typeof field !== 'undefined' && field == 'first_name' ? 'selected' : '' %>>Buscar por Nombres</option>
-            </select>
-            <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition-all">Buscar</button>
-        </form>
+    <!-- NUEVO: BUSCADOR UNIVERSAL EN VIVO -->
+    <div class="relative group mb-6">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-indigo-500">
+            <i data-lucide="search" class="h-6 w-6 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+        </div>
+        <input type="text" id="liveSearchInput" 
+               class="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-white placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all shadow-sm text-lg" 
+               placeholder="Busque por ticket, documento, nombre o apellidos..."
+               autocomplete="off">
+        
+        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none">
+            <i data-lucide="x-circle" class="h-6 w-6"></i>
+        </button>
     </div>
 
+    <!-- TABLA DE RESULTADOS -->
     <% if (typeof attendees !== 'undefined') { %>
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
-            
-            <!-- CONTENEDOR CON SCROLL Y ALTURA MÁXIMA PARA ACTIVAR STICKY HEADER -->
-            <div class="overflow-auto w-full max-h-[65vh]">
-                <table class="w-full text-left border-collapse min-w-[600px] relative">
-                    
-                    <!-- CABECERA FIJA (STICKY) -->
-                    <thead class="sticky top-0 z-20 shadow-sm">
-                        <tr class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-sm border-b border-slate-200 dark:border-slate-700 transition-colors">
+            <div class="overflow-x-auto w-full">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 text-sm border-b border-slate-200 dark:border-slate-700">
                             <th class="p-4 font-semibold whitespace-nowrap">Ticket y Doc</th>
                             <th class="p-4 font-semibold whitespace-nowrap">Nombres e Iglesia</th>
                             
                             <th class="p-4 font-semibold whitespace-nowrap">
                                 <% const nextSort = (typeof sortOrder !== 'undefined' && sortOrder === 'asc') ? 'desc' : 'asc'; %>
-                                <a href="/consult?q=<%= typeof query !== 'undefined' ? query : '' %>&field=<%= typeof field !== 'undefined' ? field : 'ticket' %>&sort=<%= nextSort %>" 
-                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 -ml-3 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 transition-colors border border-transparent hover:border-indigo-100 dark:hover:border-indigo-800">
+                                <a href="/consult?sort=<%= nextSort %>" 
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 -ml-3 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 transition-colors border border-transparent hover:border-indigo-100 dark:hover:border-indigo-800"
+                                   title="Ordenar por Apellidos">
                                     Apellidos
                                     <% if (typeof sortOrder !== 'undefined' && sortOrder === 'asc') { %>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
@@ -55,15 +49,25 @@
                             <th class="p-4 font-semibold text-right whitespace-nowrap">Acción</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    <tbody id="attendeesTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
                         <% if (attendees.length === 0) { %>
-                            <tr><td colspan="6" class="p-8 text-center text-slate-500 dark:text-slate-400">No se encontraron asistentes <% if (typeof query !== 'undefined' && query) { %>que coincidan con "<%= query %>"<% } %></td></tr>
+                            <tr id="noDataRow"><td colspan="6" class="p-8 text-center text-slate-500 dark:text-slate-400">No hay asistentes registrados en la base de datos.</td></tr>
                         <% } else { %>
                             <% attendees.forEach(function(a) { %>
-                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                <% 
+                                    const isEdited = (typeof editedTicket !== 'undefined' && editedTicket === a.ticket); 
+                                    // Creamos un string único oculto en la fila con toda la información para la búsqueda
+                                    const searchData = `${a.ticket} ${a.id_doc} ${a.first_name} ${a.last_name}`.toLowerCase();
+                                %>
+                                <tr class="attendee-row hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors <%= isEdited ? 'bg-indigo-50 dark:bg-indigo-900/40' : '' %>" data-search="<%= searchData %>">
                                     <td class="p-4">
-                                        <div class="font-medium text-indigo-600 dark:text-indigo-400"><%= a.ticket %></div>
-                                        <div class="text-xs text-slate-500 dark:text-slate-400"><%= a.id_doc_type %>: <%= a.id_doc %></div>
+                                        <button type="button" 
+                                                onclick="openDetailsModal(this)" 
+                                                data-attendee="<%= encodeURIComponent(JSON.stringify(a)) %>"
+                                                class="font-bold text-lg text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 -ml-1">
+                                            <%= a.ticket %>
+                                        </button>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1"><%= a.id_doc_type %>: <%= a.id_doc %></div>
                                     </td>
                                     <td class="p-4 font-medium text-slate-800 dark:text-slate-200">
                                         <%= a.first_name %>
@@ -106,9 +110,228 @@
                                 </tr>
                             <% }) %>
                         <% } %>
+                        <!-- Fila oculta para cuando la búsqueda no da resultados -->
+                        <tr id="emptySearchRow" class="hidden">
+                            <td colspan="6" class="p-12 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i data-lucide="search-x" class="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3"></i>
+                                    <p class="text-slate-500 dark:text-slate-400 text-lg">No se encontró a nadie para "<span id="emptySearchTerm" class="font-bold text-slate-700 dark:text-slate-300"></span>"</p>
+                                    <p class="text-slate-400 dark:text-slate-500 text-sm mt-1">Verifique si escribió correctamente el nombre o el ticket.</p>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     <% } %>
 </div>
+
+<!-- ============================================== -->
+<!-- MODAL DE DETALLES DEL ASISTENTE                -->
+<!-- ============================================== -->
+<div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-[150] flex items-center justify-center p-4 animate-in fade-in transition-colors">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in duration-200 transition-colors border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
+        
+        <div class="p-5 sm:px-8 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 transition-colors">
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <i data-lucide="user" class="text-indigo-600 dark:text-indigo-400 w-6 h-6"></i> Detalles del Asistente
+            </h3>
+            <button type="button" onclick="closeDetailsModal()" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        
+        <div class="p-5 sm:px-8 overflow-y-auto flex-1 space-y-6">
+            <div class="flex items-center gap-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50">
+                <div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
+                    <i data-lucide="ticket" class="w-8 h-8 text-indigo-500 dark:text-indigo-400"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Ticket / Boleto</p>
+                    <p id="det-ticket" class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4">
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Nombres</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-firstname"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Apellidos</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-lastname"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Documento</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-doc"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Iglesia / Congregación</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-church"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Correo Electrónico</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-email"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Teléfono</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-phone"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">País</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-country"></strong>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Sexo</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-sex"></strong>
+                </div>
+                <div class="sm:col-span-2">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Dirección</span>
+                    <strong class="text-slate-800 dark:text-slate-200 text-base block" id="det-address"></strong>
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-2">
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Rol Asignado</span>
+                    <span id="det-role" class="px-3 py-1.5 rounded-lg border text-sm font-bold shadow-sm bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-600 uppercase"></span>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Estado de Ingreso</span>
+                    <span id="det-status" class="px-3 py-1.5 rounded-lg border text-sm font-bold shadow-sm"></span>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-700 transition-colors">
+                <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Observaciones</label>
+                <div id="det-observations" class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl text-slate-800 dark:text-slate-300 min-h-[80px] whitespace-pre-wrap border border-slate-100 dark:border-slate-700 text-sm"></div>
+            </div>
+            
+        </div>
+        
+        <div class="p-5 sm:px-8 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-end gap-3 transition-colors">
+            <button type="button" onclick="closeDetailsModal()" class="w-full sm:w-auto px-6 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors text-center">Cerrar Ficha</button>
+            
+            <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
+                <a href="#" id="det-modify-btn" class="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="edit" class="w-4 h-4"></i> Modificar Registro
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- SCRIPTS: BÚSQUEDA EN VIVO Y MODAL              -->
+<!-- ============================================== -->
+<script>
+    // LÓGICA DE BÚSQUEDA UNIVERSAL (Live Search)
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('liveSearchInput');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        const rows = document.querySelectorAll('.attendee-row');
+        const emptySearchRow = document.getElementById('emptySearchRow');
+        const emptySearchTerm = document.getElementById('emptySearchTerm');
+
+        if (!searchInput) return;
+
+        // Limpiar búsqueda al hacer clic en la X
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterTable('');
+            searchInput.focus();
+        });
+
+        // Filtrar a medida que el usuario escribe
+        searchInput.addEventListener('input', (e) => {
+            filterTable(e.target.value);
+        });
+
+        function filterTable(query) {
+            const normalizedQuery = query.toLowerCase().trim();
+            
+            // Mostrar/Ocultar botón de limpiar (X)
+            if (normalizedQuery.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            let visibleCount = 0;
+
+            // Filtrar filas usando el atributo data-search oculto
+            rows.forEach(row => {
+                const searchData = row.getAttribute('data-search');
+                if (searchData.includes(normalizedQuery)) {
+                    row.style.display = ''; // Mostrar
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none'; // Ocultar
+                }
+            });
+
+            // Mostrar mensaje si no hay resultados
+            if (visibleCount === 0 && rows.length > 0) {
+                emptySearchRow.classList.remove('hidden');
+                emptySearchTerm.textContent = query;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } else {
+                emptySearchRow.classList.add('hidden');
+            }
+        }
+    });
+
+    // LÓGICA DEL MODAL DE DETALLES
+    function openDetailsModal(button) {
+        const rawData = decodeURIComponent(button.getAttribute('data-attendee'));
+        const attendee = JSON.parse(rawData);
+        
+        document.getElementById('det-ticket').textContent = attendee.ticket;
+        document.getElementById('det-doc').textContent = `${attendee.id_doc_type} - ${attendee.id_doc}`;
+        document.getElementById('det-firstname').textContent = attendee.first_name;
+        document.getElementById('det-lastname').textContent = attendee.last_name;
+        document.getElementById('det-sex').textContent = attendee.sex || 'No registrado';
+        document.getElementById('det-church').textContent = attendee.church || 'No registrada';
+        document.getElementById('det-email').textContent = attendee.email;
+        document.getElementById('det-phone').textContent = attendee.phone || 'No registrado';
+        document.getElementById('det-address').textContent = attendee.address || 'No registrada';
+        document.getElementById('det-country').textContent = attendee.country;
+        
+        let roleName = attendee.role;
+        if (roleName === 'Leader') roleName = 'Líder';
+        if (roleName === 'Public') roleName = 'Público';
+        if (roleName === 'Cordinador') roleName = 'Coordinador';
+        document.getElementById('det-role').textContent = roleName;
+        
+        const statusEl = document.getElementById('det-status');
+        if (attendee.is_present) {
+            statusEl.textContent = '✅ Adentro (Ingresó)';
+            statusEl.className = 'px-3 py-1.5 rounded-lg border text-sm font-bold shadow-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+        } else {
+            statusEl.textContent = '⏳ Pendiente (No ha llegado)';
+            statusEl.className = 'px-3 py-1.5 rounded-lg border text-sm font-bold shadow-sm bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+        }
+
+        const obsEl = document.getElementById('det-observations');
+        if (attendee.observations && attendee.observations.trim() !== '') {
+            obsEl.textContent = attendee.observations;
+            obsEl.classList.remove('text-slate-400', 'italic');
+        } else {
+            obsEl.textContent = 'Sin observaciones especiales registradas para este asistente.';
+            obsEl.classList.add('text-slate-400', 'italic');
+        }
+        
+        const modBtn = document.getElementById('det-modify-btn');
+        if (modBtn) {
+            modBtn.href = '/modify?ticket=' + encodeURIComponent(attendee.ticket);
+        }
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        document.getElementById('detailsModal').classList.remove('hidden');
+    }
+
+    function closeDetailsModal() {
+        document.getElementById('detailsModal').classList.add('hidden');
+    }
+</script>

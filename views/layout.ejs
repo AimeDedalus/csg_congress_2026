@@ -6,15 +6,28 @@
     <meta name="theme-color" content="#312e81">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title><%= title %> - Congreso CSG App</title>
+    <title><%= title %> - Congreso Cristiano CSG App</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Configuración para habilitar clases 'dark:' en Tailwind -->
+    
+    <!-- FUENTE PREMIUM PLUS JAKARTA SANS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script>
         window.tailwind = window.tailwind || {};
-        window.tailwind.config = { darkMode: 'class' };
+        window.tailwind.config = { 
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        };
     </script>
 
     <style>
@@ -28,20 +41,39 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .pb-nav-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.75rem); }
+        .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 5rem); }
+
+        /* CORRECCIÓN GLOBAL: Evita que el autocompletado ponga fondo blanco en Modo Oscuro */
+        .dark input:-webkit-autofill,
+        .dark input:-webkit-autofill:hover, 
+        .dark input:-webkit-autofill:focus, 
+        .dark input:-webkit-autofill:active,
+        .dark select:-webkit-autofill,
+        .dark select:-webkit-autofill:hover,
+        .dark select:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 30px #334155 inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
     </style>
+
+    <!-- SOLUCIÓN AL PARPADEO (FOUC): Revisa el modo oscuro ANTES de cargar el body -->
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
 
-<!-- Fondo general transiciona suavemente entre claro y oscuro -->
-<body class="flex flex-col md:flex-row h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200 overflow-hidden transition-colors duration-300">
+<body class="flex flex-col h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200 overflow-hidden transition-colors duration-300">
     
-    <!-- MOBILE HEADER -->
+    <!-- HEADER MÓVIL (Solo visible en celulares) -->
     <header class="md:hidden w-full bg-indigo-950 text-white flex items-center justify-between p-4 flex-shrink-0 z-20 shadow-md">
         <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold">CTG App</h1>
+            <h1 class="text-lg font-bold tracking-tight">CSG App</h1>
         </div>
         
         <div class="flex items-center gap-3">
-            <!-- BOTÓN MODO OSCURO MÓVIL -->
             <button onclick="toggleGlobalDarkMode()" class="text-indigo-300 hover:text-white transition-colors bg-indigo-900/50 p-1.5 rounded-lg border border-indigo-800">
                 <i data-lucide="moon" id="darkModeIconMob" class="w-5 h-5"></i>
             </button>
@@ -59,79 +91,75 @@
         </div>
     </header>
 
-    <!-- SIDEBAR NAVIGATION (Desktop) -->
-    <nav class="w-64 bg-indigo-900 dark:bg-slate-950 text-white flex-col shadow-xl z-20 hidden md:flex flex-shrink-0 transition-colors">
-        <div class="p-6 bg-indigo-950 flex items-center gap-3">
-            <h1 class="text-xl font-bold leading-tight">Congreso Cristiano<br/>CTG App</h1>
-        </div>
+    <!-- HEADER DESKTOP / TOP NAVBAR -->
+    <header class="hidden md:flex w-full bg-indigo-900 dark:bg-slate-950 text-white items-center justify-between px-6 py-3 shadow-md z-20 flex-shrink-0 transition-colors border-b border-indigo-800 dark:border-slate-800">
         
-        <div class="flex flex-col py-4 gap-1 px-3 flex-1 overflow-y-auto min-h-0">
-            <a href="/" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Inicio' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="home" class="w-5 h-5"></i><span>Inicio</span>
-            </a>
+        <div class="flex items-center gap-6 overflow-hidden">
+            <div class="flex items-center gap-2 pr-6 border-r border-indigo-700 dark:border-slate-800 flex-shrink-0">
+                <h1 class="text-xl font-bold tracking-tight">CSG App</h1>
+            </div>
             
-            <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
-            <a href="/dashboard" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Panel de Control' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Panel de Control</span>
-            </a>
-            <a href="/reports" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Reportes' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="file-text" class="w-5 h-5"></i><span>Reportes</span>
-            </a>
-            <div class="my-2 border-t border-indigo-800 dark:border-slate-800"></div>
-            <a href="/register" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Registro' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="user-plus" class="w-5 h-5"></i><span>Registrar Asistente</span>
-            </a>
-            <% } %>
+            <nav class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                <a href="/" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Inicio' ? 'bg-indigo-600 text-white shadow-sm' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
+                    <i data-lucide="home" class="w-4 h-4"></i>Inicio
+                </a>
+                
+                <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
+                <a href="/dashboard" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Panel de Control' ? 'bg-indigo-600 text-white shadow-sm' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>Panel
+                </a>
+                <a href="/reports" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Reportes' ? 'bg-indigo-600 text-white shadow-sm' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>Reportes
+                </a>
+                <a href="/register" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Registro' ? 'bg-indigo-600 text-white shadow-sm' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>Registro
+                </a>
+                <% } %>
 
-            <% if (user) { %>
-            <a href="/consult" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Consultas y Check-In' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="search" class="w-5 h-5"></i><span>Consultas y Entrada</span>
-            </a>
-            <% } %>
-            
-            <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
-            <a href="/modify" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Modificar Registro' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="edit" class="w-5 h-5"></i><span>Modificar Detalles</span>
-            </a>
-            <a href="/delete" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Eliminar Registro' ? 'bg-indigo-600 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
-                <i data-lucide="trash-2" class="w-5 h-5"></i><span>Eliminar Registro</span>
-            </a>
-            <% } %>
+                <% if (user) { %>
+                <a href="/consult" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Consultas y Check-In' ? 'bg-indigo-600 text-white shadow-sm' : 'text-indigo-200 hover:bg-indigo-800 hover:text-white' %>">
+                    <i data-lucide="search" class="w-4 h-4"></i>Consultas
+                </a>
+                <% } %>
 
-            <% if (user && user.role === 'superadmin') { %>
-            <div class="my-2 border-t border-indigo-800 dark:border-slate-800"></div>
-            <a href="/users" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Gestión de Usuarios' ? 'bg-indigo-600 text-white shadow-md' : 'text-amber-400 hover:bg-indigo-800 hover:text-amber-300' %>">
-                <i data-lucide="user-cog" class="w-5 h-5"></i><span>Gestión Usuarios</span>
-            </a>
-            <a href="/logs" class="flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors text-left font-medium <%= title === 'Registro de Actividad' ? 'bg-indigo-600 text-white shadow-md' : 'text-amber-400 hover:bg-indigo-800 hover:text-amber-300' %>">
-                <i data-lucide="activity" class="w-5 h-5"></i><span>Registro Actividad</span>
-            </a>
-            <% } %>
+                <% if (user && user.role === 'superadmin') { %>
+                <div class="h-5 w-px bg-indigo-700 dark:bg-slate-800 mx-2 hidden lg:block"></div>
+                <a href="/users" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Gestión de Usuarios' ? 'bg-indigo-600 text-white shadow-sm' : 'text-amber-400 hover:bg-indigo-800 hover:text-amber-300' %>">
+                    <i data-lucide="user-cog" class="w-4 h-4"></i>Usuarios
+                </a>
+                <a href="/logs" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap <%= title === 'Registro de Actividad' ? 'bg-indigo-600 text-white shadow-sm' : 'text-amber-400 hover:bg-indigo-800 hover:text-amber-300' %>">
+                    <i data-lucide="activity" class="w-4 h-4"></i>Logs
+                </a>
+                <% } %>
+            </nav>
         </div>
 
-        <div class="px-4 pb-6 mt-auto">
-            <!-- BOTÓN MODO OSCURO DESKTOP -->
-            <button onclick="toggleGlobalDarkMode()" class="flex items-center justify-center gap-2 w-full px-4 py-2.5 mb-4 bg-indigo-950 hover:bg-indigo-800 text-indigo-200 hover:text-white rounded-lg transition-colors text-sm font-medium border border-indigo-800">
-                <i data-lucide="moon" id="darkModeIconDesk" class="w-4 h-4"></i> <span id="darkModeTextDesk">Modo Oscuro</span>
+        <div class="flex items-center gap-4 flex-shrink-0 ml-4">
+            <button onclick="toggleGlobalDarkMode()" class="text-indigo-300 hover:text-white transition-colors bg-indigo-900/50 dark:bg-slate-800 p-2 rounded-lg border border-indigo-800 dark:border-slate-700">
+                <i data-lucide="moon" id="darkModeIconDesk" class="w-4 h-4"></i>
             </button>
 
             <% if (user) { %>
-                <div class="mb-3 text-center text-xs text-indigo-300">
-                    Usuario: <strong class="text-white"><%= user.username %></strong> (<%= user.role %>)
+                <div class="flex items-center gap-4 pl-4 border-l border-indigo-700 dark:border-slate-800">
+                    <div class="text-right hidden lg:block">
+                        <p class="text-sm font-bold leading-none text-white"><%= user.username %></p>
+                        <p class="text-[11px] text-indigo-300 capitalize mt-1 tracking-wide"><%= user.role %></p>
+                    </div>
+                    <a href="/logout" class="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors text-sm font-medium border border-red-500/20 shadow-sm">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> <span class="hidden lg:inline">Salir</span>
+                    </a>
                 </div>
-                <a href="/logout" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white rounded-lg transition-colors text-sm font-medium">
-                    <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión
-                </a>
             <% } else { %>
-                <a href="/login" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white rounded-lg transition-colors text-sm font-medium">
+                <a href="/login" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors text-sm font-medium shadow-sm">
                     <i data-lucide="lock" class="w-4 h-4"></i> Iniciar Sesión
                 </a>
             <% } %>
         </div>
-    </nav>
+    </header>
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 relative min-w-0 w-full overflow-x-hidden overflow-y-auto">
+    <!-- AREA DE CONTENIDO PRINCIPAL -->
+    <main class="flex-1 relative min-w-0 w-full overflow-x-hidden overflow-y-auto pb-safe md:pb-0">
+        
         <% if (typeof success !== 'undefined' && success) { %>
             <div class="absolute top-4 right-4 p-4 rounded-lg shadow-lg flex items-center gap-3 z-[110] text-white bg-emerald-600 animate-in fade-in mx-4 sm:mx-0">
                 <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
@@ -150,16 +178,13 @@
         </div>
     </main>
 
-    <!-- MOBILE NAVIGATION (Scrollable) -->
+    <!-- NAVEGACIÓN MÓVIL INFERIOR -->
     <nav class="md:hidden w-full bg-indigo-900 dark:bg-slate-950 text-white flex flex-shrink-0 overflow-x-auto no-scrollbar items-center justify-start pt-3 px-4 gap-5 z-20 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.2)] pb-nav-safe border-t border-indigo-800 transition-colors">
         <a href="/" class="p-2 flex-shrink-0 rounded-lg <%= title === 'Inicio' ? 'bg-indigo-600 text-white' : 'text-indigo-300' %>"><i data-lucide="home" class="w-6 h-6"></i></a>
         
         <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
         <a href="/dashboard" class="p-2 flex-shrink-0 rounded-lg <%= title === 'Panel de Control' ? 'bg-indigo-600 text-white' : 'text-indigo-300' %>"><i data-lucide="layout-dashboard" class="w-6 h-6"></i></a>
         <a href="/register" class="p-2 flex-shrink-0 rounded-lg <%= title === 'Registro' ? 'bg-indigo-600 text-white' : 'text-indigo-300' %>"><i data-lucide="user-plus" class="w-6 h-6"></i></a>
-        
-        <a href="/modify" class="p-2 flex-shrink-0 rounded-lg <%= title === 'Modificar Registro' ? 'bg-indigo-600 text-white' : 'text-indigo-300' %>"><i data-lucide="edit" class="w-6 h-6"></i></a>
-        <a href="/delete" class="p-2 flex-shrink-0 rounded-lg <%= title === 'Eliminar Registro' ? 'bg-indigo-600 text-white' : 'text-indigo-300' %>"><i data-lucide="trash-2" class="w-6 h-6"></i></a>
         <% } %>
         
         <% if (user) { %>
@@ -172,15 +197,10 @@
         <% } %>
     </nav>
 
-    <!-- SCRIPT GLOBAL MODO OSCURO -->
     <script>
         function initGlobalDarkMode() {
-            const isDark = localStorage.getItem('darkMode') === 'true';
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+            // Ya aplicamos la clase en el <head>, pero sincronizamos los íconos
+            const isDark = document.documentElement.classList.contains('dark');
             updateGlobalDarkModeUI(isDark);
         }
 
@@ -193,11 +213,8 @@
 
         function updateGlobalDarkModeUI(isDark) {
             const deskIcon = document.getElementById('darkModeIconDesk');
-            const deskText = document.getElementById('darkModeTextDesk');
             const mobIcon = document.getElementById('darkModeIconMob');
-            
             if (deskIcon) deskIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-            if (deskText) deskText.textContent = isDark ? 'Modo Claro' : 'Modo Oscuro';
             if (mobIcon) mobIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
         }
 

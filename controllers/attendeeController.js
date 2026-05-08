@@ -180,12 +180,18 @@ exports.getLogs = async (req, res) => {
 exports.getDashboard = async (req, res) => {
   try {
     const attendees = await Attendee.findAll();
+    const presentAttendees = attendees.filter(a => a.is_present);
+
     const stats = {
       total: attendees.length,
-      present: attendees.filter(a => a.is_present).length,
+      present: presentAttendees.length,
       absent: attendees.filter(a => !a.is_present).length,
+      
       roles: attendees.reduce((acc, a) => { acc[a.role] = (acc[a.role] || 0) + 1; return acc; }, {}),
-      countries: attendees.reduce((acc, a) => { acc[a.country] = (acc[a.country] || 0) + 1; return acc; }, {})
+      countries: attendees.reduce((acc, a) => { acc[a.country] = (acc[a.country] || 0) + 1; return acc; }, {}),
+      
+      presentRoles: presentAttendees.reduce((acc, a) => { acc[a.role] = (acc[a.role] || 0) + 1; return acc; }, {}),
+      presentCountries: presentAttendees.reduce((acc, a) => { acc[a.country] = (acc[a.country] || 0) + 1; return acc; }, {})
     };
     res.render('dashboard', { title: 'Panel de Control', stats });
   } catch (err) {
@@ -211,6 +217,9 @@ exports.getReports = async (req, res) => {
     const men = attendees.filter(a => a.sex === 'Masculino');
     const women = attendees.filter(a => a.sex === 'Femenino');
 
+    const present = attendees.filter(a => a.is_present);
+    const absent = attendees.filter(a => !a.is_present);
+
     const churchGroups = attendees.reduce((acc, a) => {
       const churchName = (a.church && a.church.trim() !== '') ? a.church.trim() : 'Sin Iglesia Registrada';
       if (!acc[churchName]) acc[churchName] = [];
@@ -221,7 +230,7 @@ exports.getReports = async (req, res) => {
     res.render('reports', { 
       title: 'Reportes', 
       pastors, leaders, coordinators, volunteers, publicAttendees, 
-      men, women, churchGroups, 
+      men, women, present, absent, churchGroups, 
       filter, sortOrder 
     });
   } catch (err) {
@@ -266,6 +275,7 @@ exports.getConsult = async (req, res) => {
   const query = req.query.q || '';
   const field = req.query.field || 'ticket';
   const sortOrder = req.query.sort || '';
+  const editedTicket = req.query.edited || null;
   
   let attendees = await Attendee.findAll();
   
@@ -276,15 +286,25 @@ exports.getConsult = async (req, res) => {
   if (sortOrder === 'asc') attendees.sort((a, b) => a.last_name.localeCompare(b.last_name));
   else if (sortOrder === 'desc') attendees.sort((a, b) => b.last_name.localeCompare(a.last_name));
 
-  res.render('consult', { title: 'Consultas y Check-In', attendees, query, field, sortOrder });
+  if (editedTicket && !query) {
+    const editedIndex = attendees.findIndex(a => a.ticket === editedTicket);
+    if (editedIndex > 0) {
+      const [edited] = attendees.splice(editedIndex, 1);
+      attendees.unshift(edited);
+    }
+  }
+
+  res.render('consult', { title: 'Consultas y Check-In', attendees, query, field, sortOrder, editedTicket });
 };
 
+// --- CORRECCIÓN MARCAR ENTRADA ---
 exports.postCheckIn = async (req, res) => {
   await Attendee.checkIn(req.body.ticket);
   if (typeof Log !== 'undefined' && Log.create) {
     await Log.create(req.session.user.username, 'CHECK_IN', `Marcó entrada exitosa para el Ticket: ${req.body.ticket}.`);
   }
-  res.redirect('/consult?q=' + req.body.ticket + '&field=ticket');
+  // Redirige a Consultas con el parámetro 'edited' para limpiar el buscador y resaltar la fila en verde
+  res.redirect('/consult?edited=' + encodeURIComponent(req.body.ticket));
 };
 
 exports.getModify = async (req, res) => {
@@ -304,6 +324,7 @@ exports.getModify = async (req, res) => {
   res.render('modify', { title: 'Modificar Registro', attendee, success: null, countries, docTypes });
 };
 
+// --- CORRECCIÓN MODIFICAR ---
 exports.postModify = async (req, res) => {
   let countries = [];
   let docTypes = [];
@@ -320,8 +341,8 @@ exports.postModify = async (req, res) => {
         await Log.create(req.session.user.username, 'MODIFICACION', `Modificó los datos del asistente con Ticket: ${req.body.ticket}.`);
     }
     
-    const attendee = await Attendee.findByTicket(req.body.ticket);
-    res.render('modify', { title: 'Modificar Registro', attendee, success: '¡Registro actualizado exitosamente!', countries, docTypes });
+    // Redirige a Consultas tras modificar exitosamente
+    res.redirect('/consult?edited=' + encodeURIComponent(req.body.ticket));
   } catch (err) {
     const attendee = await Attendee.findByTicket(req.body.ticket);
     res.render('modify', { title: 'Modificar Registro', attendee, success: null, error: 'Error al actualizar el registro.', countries, docTypes });
@@ -342,4 +363,3 @@ exports.postDelete = async (req, res) => {
   }
   res.render('delete', { title: 'Eliminar Registro', attendee: null, success: 'Registro eliminado permanentemente.' });
 };
-
